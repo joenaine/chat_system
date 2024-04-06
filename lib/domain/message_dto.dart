@@ -1,75 +1,27 @@
-import 'dart:convert';
+import 'package:chat_system/core/timestamp_converter.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:json_annotation/json_annotation.dart';
 
-import 'package:chat_system/core/constants.dart';
+part 'message_dto.g.dart';
 
+typedef Json = Map<String, dynamic>;
+
+@JsonSerializable()
 class Message {
   final String? message;
   final String? id;
+  @TimestampConverter()
   final DateTime? createdAt;
+  final List<Message>? messages;
 
-  Message({
-    this.message,
-    this.id,
-    this.createdAt,
-  });
+  Message({this.message, this.id, this.createdAt, this.messages});
 
-  Message copyWith({
-    String? message,
-    String? id,
-    DateTime? createdAt,
-  }) {
-    return Message(
-      message: message ?? this.message,
-      id: id ?? this.id,
-      createdAt: createdAt ?? this.createdAt,
-    );
+  factory Message.fromJson(Map<String, dynamic> json) =>
+      _$MessageFromJson(json);
+
+  factory Message.fromFirestore(DocumentSnapshot<Json> doc) {
+    return Message.fromJson(doc.data() ?? {});
   }
 
-  Map<String, dynamic> toMap() {
-    final result = <String, dynamic>{};
-
-    if (message != null) {
-      result.addAll({'message': message});
-    }
-    if (id != null) {
-      result.addAll({'id': id});
-    }
-    if (createdAt != null) {
-      result.addAll({'createdAt': createdAt!.millisecondsSinceEpoch});
-    }
-
-    return result;
-  }
-
-  factory Message.fromMap(Map<String, dynamic> map) {
-    return Message(
-      message: map['message'],
-      id: map['id'],
-      createdAt: map['createdAt'] != null
-          ? DateTime.fromMillisecondsSinceEpoch(map['createdAt'])
-          : null,
-    );
-  }
-
-  String toJson() => json.encode(toMap());
-
-  factory Message.fromJson(String source) =>
-      Message.fromMap(json.decode(source));
-
-  @override
-  String toString() =>
-      'Message(message: $message, id: $id, createdAt: $createdAt)';
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-
-    return other is Message &&
-        other.message == message &&
-        other.id == id &&
-        other.createdAt == createdAt;
-  }
-
-  @override
-  int get hashCode => message.hashCode ^ id.hashCode ^ createdAt.hashCode;
+  Map<String, dynamic> toJson() => _$MessageToJson(this);
 }

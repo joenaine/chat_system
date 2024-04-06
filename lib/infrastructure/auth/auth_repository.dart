@@ -18,6 +18,7 @@ class AuthRepository {
         .set({
       'username': username,
       'email': user.user?.email,
+      'id': user.user?.uid
     });
     return user;
   }

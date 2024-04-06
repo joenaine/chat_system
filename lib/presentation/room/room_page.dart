@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:chat_system/domain/user_dto.dart';
 import 'package:chat_system/infrastructure/auth/auth_repository.dart';
+import 'package:chat_system/presentation/routes/routes.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -42,13 +43,19 @@ class RoomPage extends StatelessWidget {
               shrinkWrap: true,
               itemCount: usersList.length,
               itemBuilder: (BuildContext context, int index) {
-                return Container(
-                    margin: const EdgeInsets.all(8),
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                        border: Border.all(color: Colors.black12),
-                        borderRadius: BorderRadius.circular(8)),
-                    child: Text(usersList[index].email ?? ''));
+                return GestureDetector(
+                  onTap: () {
+                    AutoRouter.of(context)
+                        .push(ChatRoute(id: usersList[index].id ?? ''));
+                  },
+                  child: Container(
+                      margin: const EdgeInsets.all(8),
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                          border: Border.all(color: Colors.black12),
+                          borderRadius: BorderRadius.circular(8)),
+                      child: Text(usersList[index].email ?? '')),
+                );
               },
             );
           } else {
