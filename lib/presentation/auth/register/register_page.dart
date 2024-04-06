@@ -9,18 +9,18 @@ import 'package:flutter/material.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 
 @RoutePage()
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class RegisterPage extends StatefulWidget {
+  const RegisterPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<RegisterPage> createState() => _RegisterPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
-  GlobalKey<FormState> formKey = GlobalKey<FormState>();
+class _RegisterPageState extends State<RegisterPage> {
+  bool isLoading = false;
   String? email;
   String? password;
-  bool isLoading = false;
+  GlobalKey<FormState> formKey = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
     return ModalProgressHUD(
@@ -29,6 +29,15 @@ class _LoginPageState extends State<LoginPage> {
         backgroundColor: kPrimaryColor,
         appBar: AppBar(
           backgroundColor: kPrimaryColor,
+          leading: IconButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            icon: const Icon(
+              Icons.arrow_back,
+              color: Colors.white,
+            ),
+          ),
         ),
         body: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -54,7 +63,7 @@ class _LoginPageState extends State<LoginPage> {
                   const Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      'LOGIN',
+                      'REGISTER',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 24,
@@ -65,8 +74,8 @@ class _LoginPageState extends State<LoginPage> {
                     height: 20,
                   ),
                   CustomTextFormFiled(
-                    onChanged: (value) {
-                      email = value;
+                    onChanged: (data) {
+                      email = data;
                     },
                     hintText: 'Email',
                   ),
@@ -74,9 +83,8 @@ class _LoginPageState extends State<LoginPage> {
                     height: 20,
                   ),
                   CustomTextFormFiled(
-                    securedPassword: true,
-                    onChanged: (value) {
-                      password = value;
+                    onChanged: (data) {
+                      password = data;
                     },
                     hintText: 'Password',
                   ),
@@ -86,28 +94,26 @@ class _LoginPageState extends State<LoginPage> {
                   CustomButton(
                     onPressed: () async {
                       final scaffoldMessenger = ScaffoldMessenger.of(context);
+
                       if (formKey.currentState!.validate()) {
                         setState(() {
                           isLoading = true;
                         });
                         try {
-                          await loginUser();
+                          await registerUser();
                           AutoRouter.of(context)
                               .pushNamed(ChatRoute(email: email!).routeName);
-                          Navigator.pushNamed(
-                            context,
-                            ChatPage.chatRoute,
-                            arguments: email,
-                          );
+                          // Navigator.pushNamed(context, ChatPage.chatRoute,
+                          //     arguments: email);
                         } on FirebaseAuthException catch (e) {
                           String message = '';
-                          if (e.code == 'user-not-found') {
-                            message = 'No user found for that email.';
-                          } else if (e.code == 'wrong-password') {
-                            message = 'Wrong password provided for that user.';
+                          if (e.code == 'weak-password') {
+                            message = 'The password provided is too weak.';
+                          } else if (e.code == 'email-already-in-use') {
+                            message =
+                                'The account already exists for that email.';
                           } else {
-                            message = e.message ??
-                                'An error occurred. Please try again.';
+                            message = e.message ?? 'An unknown error occurred.';
                           }
                           scaffoldMessenger.showSnackBar(
                             SnackBar(
@@ -132,7 +138,7 @@ class _LoginPageState extends State<LoginPage> {
                         );
                       }
                     },
-                    text: 'LOGIN',
+                    text: 'REGISTER',
                   ),
                   const SizedBox(
                     height: 20,
@@ -141,21 +147,17 @@ class _LoginPageState extends State<LoginPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const Text(
-                        'Don\'t have an account?',
+                        'Already have an account?',
                         style: TextStyle(
                           color: Colors.white,
                         ),
                       ),
                       TextButton(
                         onPressed: () {
-                          AutoRouter.of(context).pushNamed(RegisterRoute.name);
-                          // Navigator.pushNamed(
-                          //   context,
-                          //   RegisterPage.registerRoute,
-                          // );
+                          Navigator.pop(context);
                         },
                         child: const Text(
-                          'Register',
+                          'LOGIN',
                           style: TextStyle(
                             color: Colors.white,
                           ),
@@ -172,9 +174,9 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Future<UserCredential> loginUser() async {
-    UserCredential user =
-        await FirebaseAuth.instance.signInWithEmailAndPassword(
+  Future<UserCredential> registerUser() async {
+    var auth = FirebaseAuth.instance;
+    UserCredential user = await auth.createUserWithEmailAndPassword(
       email: email!,
       password: password!,
     );
