@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "633774493914",
+    "project_id": "chat-system-fb693",
+    "storage_bucket": "chat-system-fb693.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:633774493914:android:57828946c9ae95b09f15e3",
+        "android_client_info": {
+          "package_name": "com.example.chat_system"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDye2VdnZ6YEIRS3tHog9qW3l1k6i3RkZQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

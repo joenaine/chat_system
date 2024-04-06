@@ -1,8 +1,10 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:chat_system/core/constants.dart';
+import 'package:chat_system/infrastructure/auth/auth_repository.dart';
 import 'package:chat_system/presentation/chat/chat_page.dart';
 import 'package:chat_system/presentation/common_widgets/custom_button.dart';
 import 'package:chat_system/presentation/common_widgets/custom_text_field.dart';
+import 'package:chat_system/presentation/room/room_page.dart';
 import 'package:chat_system/presentation/routes/routes.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -37,9 +39,9 @@ class _LoginPageState extends State<LoginPage> {
             child: SingleChildScrollView(
               child: Column(
                 children: [
-                  Image.asset(
-                    'assets/images/scholar.png',
-                  ),
+                  // Image.asset(
+                  //   'assets/images/scholar.png',
+                  // ),
                   const Text(
                     'Scholar Chat ',
                     style: TextStyle(
@@ -91,14 +93,8 @@ class _LoginPageState extends State<LoginPage> {
                           isLoading = true;
                         });
                         try {
-                          await loginUser();
-                          AutoRouter.of(context)
-                              .pushNamed(ChatRoute(email: email!).routeName);
-                          Navigator.pushNamed(
-                            context,
-                            ChatPage.chatRoute,
-                            arguments: email,
-                          );
+                          await AuthRepository.loginUser(
+                              email: email!, password: password!);
                         } on FirebaseAuthException catch (e) {
                           String message = '';
                           if (e.code == 'user-not-found') {
@@ -148,7 +144,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       TextButton(
                         onPressed: () {
-                          AutoRouter.of(context).pushNamed(RegisterRoute.name);
+                          AutoRouter.of(context).push(const RegisterRoute());
                           // Navigator.pushNamed(
                           //   context,
                           //   RegisterPage.registerRoute,
@@ -170,14 +166,5 @@ class _LoginPageState extends State<LoginPage> {
         ),
       ),
     );
-  }
-
-  Future<UserCredential> loginUser() async {
-    UserCredential user =
-        await FirebaseAuth.instance.signInWithEmailAndPassword(
-      email: email!,
-      password: password!,
-    );
-    return user;
   }
 }

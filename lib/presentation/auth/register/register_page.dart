@@ -1,9 +1,11 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:chat_system/core/constants.dart';
+import 'package:chat_system/infrastructure/auth/auth_repository.dart';
 import 'package:chat_system/presentation/chat/chat_page.dart';
 import 'package:chat_system/presentation/common_widgets/custom_button.dart';
 import 'package:chat_system/presentation/common_widgets/custom_text_field.dart';
 import 'package:chat_system/presentation/routes/routes.dart';
+import 'package:chat_system/presentation/splash/splash_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
@@ -20,6 +22,7 @@ class _RegisterPageState extends State<RegisterPage> {
   bool isLoading = false;
   String? email;
   String? password;
+  String? username;
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
@@ -46,9 +49,9 @@ class _RegisterPageState extends State<RegisterPage> {
             child: SingleChildScrollView(
               child: Column(
                 children: [
-                  Image.asset(
-                    'assets/images/scholar.png',
-                  ),
+                  // Image.asset(
+                  //   'assets/images/scholar.png',
+                  // ),
                   const Text(
                     'Scholar Chat ',
                     style: TextStyle(
@@ -69,6 +72,15 @@ class _RegisterPageState extends State<RegisterPage> {
                         fontSize: 24,
                       ),
                     ),
+                  ),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  CustomTextFormFiled(
+                    onChanged: (data) {
+                      username = data;
+                    },
+                    hintText: 'Username',
                   ),
                   const SizedBox(
                     height: 20,
@@ -100,9 +112,11 @@ class _RegisterPageState extends State<RegisterPage> {
                           isLoading = true;
                         });
                         try {
-                          await registerUser();
-                          AutoRouter.of(context)
-                              .pushNamed(ChatRoute(email: email!).routeName);
+                          await AuthRepository.registerUser(
+                              username: username!,
+                              email: email!,
+                              password: password!);
+                          AutoRouter.of(context).maybePop();
                           // Navigator.pushNamed(context, ChatPage.chatRoute,
                           //     arguments: email);
                         } on FirebaseAuthException catch (e) {
@@ -172,14 +186,5 @@ class _RegisterPageState extends State<RegisterPage> {
         ),
       ),
     );
-  }
-
-  Future<UserCredential> registerUser() async {
-    var auth = FirebaseAuth.instance;
-    UserCredential user = await auth.createUserWithEmailAndPassword(
-      email: email!,
-      password: password!,
-    );
-    return user;
   }
 }

@@ -21,7 +21,7 @@ abstract class _$AppRouter extends RootStackRouter {
         routeData: routeData,
         child: ChatPage(
           key: args.key,
-          email: args.email,
+          id: args.id,
         ),
       );
     },
@@ -37,6 +37,18 @@ abstract class _$AppRouter extends RootStackRouter {
         child: const RegisterPage(),
       );
     },
+    RoomRoute.name: (routeData) {
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: const RoomPage(),
+      );
+    },
+    SplashRoute.name: (routeData) {
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: const SplashPage(),
+      );
+    },
   };
 }
 
@@ -45,13 +57,13 @@ abstract class _$AppRouter extends RootStackRouter {
 class ChatRoute extends PageRouteInfo<ChatRouteArgs> {
   ChatRoute({
     Key? key,
-    required String email,
+    required String id,
     List<PageRouteInfo>? children,
   }) : super(
           ChatRoute.name,
           args: ChatRouteArgs(
             key: key,
-            email: email,
+            id: id,
           ),
           initialChildren: children,
         );
@@ -64,16 +76,16 @@ class ChatRoute extends PageRouteInfo<ChatRouteArgs> {
 class ChatRouteArgs {
   const ChatRouteArgs({
     this.key,
-    required this.email,
+    required this.id,
   });
 
   final Key? key;
 
-  final String email;
+  final String id;
 
   @override
   String toString() {
-    return 'ChatRouteArgs{key: $key, email: $email}';
+    return 'ChatRouteArgs{key: $key, id: $id}';
   }
 }
 
@@ -101,6 +113,34 @@ class RegisterRoute extends PageRouteInfo<void> {
         );
 
   static const String name = 'RegisterRoute';
+
+  static const PageInfo<void> page = PageInfo<void>(name);
+}
+
+/// generated route for
+/// [RoomPage]
+class RoomRoute extends PageRouteInfo<void> {
+  const RoomRoute({List<PageRouteInfo>? children})
+      : super(
+          RoomRoute.name,
+          initialChildren: children,
+        );
+
+  static const String name = 'RoomRoute';
+
+  static const PageInfo<void> page = PageInfo<void>(name);
+}
+
+/// generated route for
+/// [SplashPage]
+class SplashRoute extends PageRouteInfo<void> {
+  const SplashRoute({List<PageRouteInfo>? children})
+      : super(
+          SplashRoute.name,
+          initialChildren: children,
+        );
+
+  static const String name = 'SplashRoute';
 
   static const PageInfo<void> page = PageInfo<void>(name);
 }

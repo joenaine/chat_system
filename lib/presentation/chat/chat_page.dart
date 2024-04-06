@@ -1,17 +1,16 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:chat_system/core/constants.dart';
-import 'package:chat_system/domain/message.dart';
+import 'package:chat_system/domain/message_dto.dart';
 import 'package:chat_system/presentation/common_widgets/chat_bubble.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 @RoutePage()
 class ChatPage extends StatefulWidget {
-  const ChatPage({super.key, required this.email});
-  final String email;
-
-  static String chatRoute = 'ChatPage';
+  const ChatPage({super.key, required this.id});
+  final String id;
 
   @override
   State<ChatPage> createState() => _ChatPageState();
@@ -20,33 +19,39 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   ScrollController conroller = ScrollController();
   TextEditingController controller = TextEditingController();
-  CollectionReference messages =
-      FirebaseFirestore.instance.collection('messages');
+
   @override
   Widget build(BuildContext context) {
-    String email = ModalRoute.of(context)!.settings.arguments as String;
+    String id = widget.id;
 
-    return StreamBuilder<QuerySnapshot>(
-        stream: messages.orderBy('createdAt', descending: true).snapshots(),
+    return StreamBuilder(
+        stream: FirebaseFirestore.instance
+            .collection('users')
+            .doc(id)
+            .collection('userMessages')
+            .doc(FirebaseAuth.instance.currentUser?.uid)
+            .collection('myMessages')
+            .orderBy('createdAt')
+            .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             List<Message> messagesList = [];
             for (var element in snapshot.data!.docs) {
-              messagesList.add(Message.fromJson(element.data()));
+              messagesList.add(Message.fromMap(element.data()));
             }
             return Scaffold(
               appBar: AppBar(
                 automaticallyImplyLeading: false,
                 backgroundColor: kPrimaryColor,
                 centerTitle: true,
-                title: Row(
+                title: const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Image.asset(
-                      'assets/images/scholar.png',
-                      height: 50,
-                    ),
-                    const Text(
+                    // Image.asset(
+                    //   'assets/images/scholar.png',
+                    //   height: 50,
+                    // ),
+                    Text(
                       'Chat Page',
                       style: TextStyle(
                         color: Colors.white,
@@ -65,7 +70,8 @@ class _ChatPageState extends State<ChatPage> {
                       controller: conroller,
                       itemCount: messagesList.length,
                       itemBuilder: (context, index) {
-                        return messagesList[index].id == email
+                        return messagesList[index].id ==
+                                FirebaseAuth.instance.currentUser?.uid
                             ? ChatBubble(
                                 message: messagesList[index].message!,
                               )
@@ -80,13 +86,10 @@ class _ChatPageState extends State<ChatPage> {
                     child: TextField(
                       controller: controller,
                       onSubmitted: (value) {
-                        messages.add(
-                          {
-                            'message': value,
-                            'createdAt': DateTime.now(),
-                            'id': email,
-                          },
-                        );
+                        messagesList.add(Message(
+                            id: FirebaseAuth.instance.currentUser?.uid,
+                            createdAt: DateTime.now(),
+                            message: value));
                         controller.clear();
                         conroller.animateTo(
                           0,
@@ -97,13 +100,10 @@ class _ChatPageState extends State<ChatPage> {
                       decoration: InputDecoration(
                         suffixIcon: IconButton(
                           onPressed: () {
-                            messages.add(
-                              {
-                                'message': controller.text,
-                                'createdAt': DateTime.now(),
-                                'id': email,
-                              },
-                            );
+                            messagesList.add(Message(
+                                id: FirebaseAuth.instance.currentUser?.uid,
+                                createdAt: DateTime.now(),
+                                message: controller.text.trim()));
                             controller.clear();
                             conroller.animateTo(
                               0,
